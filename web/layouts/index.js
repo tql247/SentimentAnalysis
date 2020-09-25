@@ -4,12 +4,22 @@ export default {
     return {
       menu: [
         {
+          name: 'Document',
+          icon: 'mdi-file-document-outline',
+          route: '/document'
+        },
+        {
           name: 'Config',
           icon: 'mdi-brain',
           route: '/config'
         },
         {
-          name: 'home',
+          name: 'Statistics',
+          icon: 'mdi-chart-bar',
+          route: '/statistics'
+        },
+        {
+          name: 'Home',
           icon: 'mdi-home',
           route: '/home'
         }

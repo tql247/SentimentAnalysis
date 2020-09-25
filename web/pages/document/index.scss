@@ -1,0 +1,44 @@
+.page-content {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    padding: 10px;
+    height: 100vh;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow-y: hidden;
+    background-color: #E0E0E0;
+
+    .app-content {
+        width: 100%;
+        flex-grow: 1;
+        min-width: 700px;
+        max-width: 1350px;
+        display: flex;
+        justify-content: center;
+        overflow: auto;
+        overflow-y: hidden;
+
+        .btn {
+            font-family: 'Raleway', sans-serif;
+        }
+        
+    }
+}
+
+
+.fill-width {
+    width: 100%;
+}
+
+.thin-border {
+    border: 1px solid black;
+}
+
+.bg-white {
+    background-color: white;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

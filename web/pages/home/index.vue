@@ -33,18 +33,16 @@
                 <v-list-item-content>
                   <div class="overline mb-4">Result</div>
                   <v-list-item-title class="headline mb-1">
-                    Sentiment
+                    {{ predict }}
                   </v-list-item-title>
                   <v-list-item-subtitle>
-                    Positive
+                    {{ prob }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
 
-                <v-list-item-avatar
-                  tile
-                  size="80"
-                  color="grey"
-                ></v-list-item-avatar>
+                <v-list-item-avatar tile size="80">
+                  <v-img src="/smile.png"> </v-img>
+                </v-list-item-avatar>
               </v-list-item>
 
               <v-card-actions>
@@ -68,46 +66,6 @@
             </v-card>
           </div>
           <br />
-          <div>
-            <v-card light class="mx-3" outlined>
-              <v-list-item three-line>
-                <v-list-item-content>
-                  <div class="overline mb-4">Result</div>
-                  <v-list-item-title class="headline mb-1">
-                    Entity
-                  </v-list-item-title>
-                  <v-list-item-subtitle>
-                    she
-                  </v-list-item-subtitle>
-                </v-list-item-content>
-
-                <v-list-item-avatar
-                  tile
-                  size="80"
-                  color="grey"
-                ></v-list-item-avatar>
-              </v-list-item>
-
-              <v-card-actions>
-                <v-btn text color="success">
-                  <span class="v-align-end">
-                    Correct
-                    <v-icon>
-                      mdi-check
-                    </v-icon>
-                  </span>
-                </v-btn>
-                <v-btn text color="error">
-                  <span class="v-align-end">
-                    Wrong
-                    <v-icon>
-                      mdi-bug
-                    </v-icon>
-                  </span>
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </div>
         </v-rol>
       </v-row>
     </v-container>
