@@ -1,0 +1,55 @@
+.container {
+    position: relative;
+    .background {
+      position: absolute;
+    }
+}
+
+.login-form {
+  display: flex;
+  align-items: center;
+  justify-content: center !important;
+  height: 80vh;
+
+  .form-padding{
+    padding: 25px;
+  }
+
+  .form-header{
+    padding: 20px 0px 35px 0px ;
+  }
+
+  .form-title{
+    font-family: 'MuseoModerno', cursive;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30pt;
+  }
+  
+  .form-text {
+    font-family: 'Josefin Sans', sans-serif !important;
+  }
+  
+  .form-value {
+    font-weight: 400;
+    font-size: 15pt;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+
+  .submit {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: white;
+  }
+
+  .submit-btn {
+    padding: 20px !important;
+  }
+}
+
+.full-width{
+  width: 100%;
+}
+
+.process-bar {
+  width: 80vw;
+}
