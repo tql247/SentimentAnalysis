@@ -9,7 +9,8 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      return this.$router.push('/login')
+      // return this.$router.push('/login')
+      return this.$router.push('/home')
     })
   },
   methods: {}

@@ -6,8 +6,8 @@ export default {
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s - Tải văn bản',
-    title: 'FUI' || '',
+    titleTemplate: '%s - Aspect sentiment analysis',
+    title: 'NLP' || '',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -94,7 +94,7 @@ export default {
     '@nuxtjs/pwa',
     '@nuxtjs/dotenv',
     '@nuxtjs/axios',
-    '@nuxtjs/auth',
+    // '@nuxtjs/auth',
     '@nuxtjs/toast',
     ['vue-sweetalert2/nuxt',{
       icon: 'warning',
@@ -118,25 +118,25 @@ export default {
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  axios: {
-    baseURL: 'http://115.79.43.243:7600/service',
-    browserBaseURL: 'http://115.79.43.243:7600/service'
-  },
-  auth: {
-    strategies: {
-      local: {
-        endpoints: {
-          login: { url: '/toollogin', method: 'post', propertyName: false },
-          user: { url: '/toollogin/me', method: 'get', propertyName: 'user' },
-          logout: { url: '/toollogin/logout', method: 'post'},
-        },
-        tokenRequired: true,
-        tokenType: 'bearer',
-        autoFetchUser: false
-      }
-    },
-    redirect: false
-  },
+  // axios: {
+  //   baseURL: 'http://115.79.43.243:7600/service',
+  //   browserBaseURL: 'http://115.79.43.243:7600/service'
+  // },
+  // auth: {
+  //   strategies: {
+  //     local: {
+  //       endpoints: {
+  //         login: { url: '/toollogin', method: 'post', propertyName: false },
+  //         user: { url: '/toollogin/me', method: 'get', propertyName: 'user' },
+  //         logout: { url: '/toollogin/logout', method: 'post'},
+  //       },
+  //       tokenRequired: true,
+  //       tokenType: 'bearer',
+  //       autoFetchUser: false
+  //     }
+  //   },
+  //   redirect: false
+  // },
   /*
    ** vuetify module configuration
    ** https://github.com/nuxt-community/vuetify-module

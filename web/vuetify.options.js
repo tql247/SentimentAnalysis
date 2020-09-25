@@ -54,7 +54,7 @@ export default {
       current: 'vi',
     },
     theme: {
-      dark: true,
+      dark: false,
       themes: {
         light: {
           primary: '#FFAB40',

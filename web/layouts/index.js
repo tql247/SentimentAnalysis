@@ -1,24 +1,31 @@
 export default {
-  middleware: 'checkauth',
+  // middleware: 'checkauth',
   data() {
-    return {}
-  },
-  computed: {
-    user() {
-      return this.$auth.user.identity
+    return {
+      menu: [
+        {
+          name: 'Config',
+          icon: 'mdi-brain',
+          route: '/config'
+        },
+        {
+          name: 'home',
+          icon: 'mdi-home',
+          route: '/home'
+        }
+      ]
     }
   },
+  computed: {},
   methods: {
     handleLogout() {
       //
       try {
-        this.$auth.logout()
       } catch (error) {
         console.log(error)
       }
       //
       this.$store.dispatch('clearUser')
-      return this.$router.push('/login')
     }
   }
 }
