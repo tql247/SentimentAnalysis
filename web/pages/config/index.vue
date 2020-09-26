@@ -10,7 +10,48 @@
       </div>
     </v-overlay>
 
-    <div class="app-content d-flex"></div>
+    <v-row class="app-content d-flex">
+      <v-col cols="12" sm="12" md="10" lg="6" xl="6">
+        <v-card flat tile class="intro mx-2 mb-5">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste
+          temporibus delectus odio cumque nam libero, quidem et. Deleniti a nam
+          obcaecati optio eius itaque perferendis doloribus eum, fugit, unde
+          quibusdam.
+        </v-card>
+        <div class="model-playground">
+          <div v-for="(item, key) in playground" :key="key" class="prow">
+            <div class="header">
+              <div class="item">
+                {{ item.header }}
+              </div>
+            </div>
+            <div class="option">
+              <div
+                v-for="(option, key) in item.option"
+                :key="key"
+                :class="'item ' + (option.isPick === true ? 'active' : '')"
+                @click="changeOption(item.option, option)"
+                @mouseover="previewFeature(option)"
+              >
+                <div class="item-content">
+                  {{ option.title }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-1 mt-3 fill-width">
+          <v-btn tile class="fill-width active-btn" depressed color="success">
+            Use
+          </v-btn>
+        </div>
+      </v-col>
+      <v-col class="description" cols="12" sm="12" md="10" lg="6" xl="6">
+        <v-card flat class="content">
+          {{ showDescription }}
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

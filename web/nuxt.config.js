@@ -6,7 +6,7 @@ export default {
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s - Aspect sentiment analysis',
+    titleTemplate: '%s - Sentiment Analysis',
     title: 'NLP' || '',
     meta: [
       { charset: 'utf-8' },
@@ -50,6 +50,14 @@ export default {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap",
       },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Cabin&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Epilogue:wght@300&display=swap",
+      },
     ]
   },
   /*
@@ -66,6 +74,7 @@ export default {
   css: [
     '@/assets/main.scss',
     '@/assets/animate.min.css',
+    '@/node_modules/katex/dist/katex.min.css',
     '@/node_modules/sweetalert2/dist/sweetalert2.min.css'
   ],
   /*
