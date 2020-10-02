@@ -10,12 +10,12 @@ export default {
             {
               title: '...',
               isPick: false,
-              des: 'a'
+              des: 'Word'
             },
             {
               title: '...',
               isPick: true,
-              des: 'asdas'
+              des: 'Character'
             }
           ]
         },
@@ -23,17 +23,17 @@ export default {
           header: 'Model',
           option: [
             {
-              title: 'MGAN',
+              title: '...',
               isPick: true,
               des: '1231dzda'
             },
             {
-              title: 'LSTM',
+              title: '...',
               isPick: false,
               des: '12dA34'
             },
             {
-              title: 'TNet',
+              title: '... .................',
               isPick: false,
               des: '12FAFAWE  E34'
             }
@@ -43,12 +43,17 @@ export default {
           header: 'Active funtion',
           option: [
             {
-              title: 'Cos Sin',
+              title: '...',
               isPick: false,
               des: '12AVCSC AAS34'
             },
             {
-              title: 'Sigmod',
+              title: '...',
+              isPick: false,
+              des: '1 ASDASD ASD234'
+            },
+            {
+              title: '...',
               isPick: true,
               des: '1 ASDASD ASD234'
             }

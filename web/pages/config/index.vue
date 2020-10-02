@@ -12,12 +12,10 @@
 
     <v-row class="app-content d-flex">
       <v-col cols="12" sm="12" md="10" lg="6" xl="6">
-        <v-card flat tile class="intro mx-2 mb-5">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste
-          temporibus delectus odio cumque nam libero, quidem et. Deleniti a nam
-          obcaecati optio eius itaque perferendis doloribus eum, fugit, unde
-          quibusdam.
-        </v-card>
+        <v-alert class="intro mx-2" dense outlined type="info">
+          Với mỗi trường hợp khác nhau nên lựa chọn các phương pháp embedding,
+          model, loss và active function sao cho phù hợp.
+        </v-alert>
         <div class="model-playground">
           <div v-for="(item, key) in playground" :key="key" class="prow">
             <div class="header">
