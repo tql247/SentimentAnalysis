@@ -27,7 +27,5 @@ def sentiment_analysis(sentence):
     return jsonify(sentence)
 app.add_url_rule('/sean/<string:sentence>', 'sentiment_analysis', sentiment_analysis)
 
- 
 
 app.run(host='localhost', port=80, debug=True) 
- 
