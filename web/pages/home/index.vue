@@ -20,13 +20,13 @@
               label="Input"
               rows="1"
             ></v-text-field>
-            <v-btn class="ml-4" @click="1">Check</v-btn>
+            <v-btn class="ml-4" @click="getPredict()">Check</v-btn>
           </div>
         </v-col>
       </v-row>
 
       <v-row>
-        <v-rol cols="12" sm="12" md="12" lg="8" xl="10">
+        <v-col cols="12" sm="12" md="12" lg="8" xl="10">
           <div>
             <v-card light class="mx-3" outlined>
               <v-list-item three-line>
@@ -41,7 +41,7 @@
                 </v-list-item-content>
 
                 <v-list-item-avatar tile size="80">
-                  <v-img src="/smile.png"> </v-img>
+                  <v-img :src="predictImg"> </v-img>
                 </v-list-item-avatar>
               </v-list-item>
 
@@ -66,7 +66,7 @@
             </v-card>
           </div>
           <br />
-        </v-rol>
+        </v-col>
       </v-row>
     </v-container>
   </div>

@@ -127,10 +127,10 @@ export default {
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  // axios: {
-  //   baseURL: 'http://115.79.43.243:7600/service',
-  //   browserBaseURL: 'http://115.79.43.243:7600/service'
-  // },
+  axios: {
+    baseURL: 'http://localhost:80',
+    browserBaseURL: 'http://localhost:80'
+  },
   // auth: {
   //   strategies: {
   //     local: {
