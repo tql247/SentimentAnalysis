@@ -36,6 +36,41 @@ class Tokenizer(object):
             sequence = sequence[::-1]
         return pad_and_truncate(sequence, self.max_seq_len, padding=padding, truncating=truncating)
 
+class SADataset(Dataset):
+    def __init__(self, fname, tokenizer):
+        fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+        lines = fin.readlines()
+        fin.close()
+
+        all_data = []
+        for i in range(0, len(lines)):
+            text , pol = [s.lower().strip() for s in lines[i].split(',')]
+
+            text_raw_indices = tokenizer.text_to_sequence(text_left + " " + aspect + " " + text_right)
+            if pol == 'Positive':
+                polarity = 1
+            elif pol = 'Negative':
+                polarity = -1
+            else:
+                polarity = 0
+                
+            polarity = int(polarity) + 1
+
+            data = {  
+                'aspect_bert_indices': aspect_bert_indices,
+                'polarity': polarity,
+            }
+
+            all_data.append(data)
+        self.data = all_data
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __len__(self):
+        return len(self.data)
+
+
 class ABSADataset(Dataset):
     def __init__(self, fname, tokenizer):
         fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
