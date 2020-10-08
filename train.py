@@ -229,11 +229,11 @@ class Instructor:
         test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
         logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))    
 
-def main():
-    # Hyper Parameters
-    ins = Instructor(model_name='rnn')
-    ins.run()
+# def main():
+    # # Hyper Parameters
+    # ins = Instructor(model_name='rnn')
+    # ins.run()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+    # main()

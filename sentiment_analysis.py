@@ -8,5 +8,6 @@ def SentimentAnalysis(param, text):
         cnn_predict(text)
     else:
         ins = Instructor(model_name = param['model'])
+        ins.run()
         
         
