@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 
-from data_utils import build_tokenizer, build_embedding_matrix, SADataset, Tokenizer
+from data_utils import build_tokenizer, build_embedding_matrix, SADataset, Tokenizer, Dat
 
 from models.lstm import LSTM
 from models.rnn import RNN
@@ -28,7 +28,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class Instructor:
     def __init__(self, model_name='lstm', dataset='train', optimizer='adam',initializer='xavier_uniform_',
-                learning_rate=2e-5, dropout=0.1, l2reg=0.01, num_epoch=10, batch_size=16, log_step=5, embed_dim=300,
+                learning_rate=2e-5, dropout=0.1, l2reg=0.01, num_epoch=16, batch_size=16, log_step=5, embed_dim=300,
                 hidden_dim=300, max_seq_len=80, polarities_dim=3, device=None, valset_ratio=0):
         self.model_name = model_name
         self.dataset = dataset
@@ -102,7 +102,7 @@ class Instructor:
         self.model = self.model_class(self.embedding_matrix, self).to(self.device)
 
         self.trainset = SADataset(self.dataset_file['train'], self.tokenizer)
-        print(self.trainset)
+
         self.testset = SADataset(self.dataset_file['test'], self.tokenizer)
         assert 0 <= self.valset_ratio < 1
         if self.valset_ratio > 0:
@@ -160,7 +160,7 @@ class Instructor:
                 max_val_acc = val_acc
                 if not os.path.exists('state_dict'):
                     os.mkdir('state_dict')
-                path = 'state_dict/{0}_{1}_val_acc{2}'.format(self.model_name, self.dataset, round(val_acc, 4))
+                path = 'state_dict/{0}_{1}_val_acc'.format(self.model_name, self.dataset)
                 torch.save(self.model.state_dict(), path)
                 logger.info('>> saved: {}'.format(path))
             if val_f1 > max_val_f1:
@@ -216,6 +216,7 @@ class Instructor:
             for t_batch, t_sample_batched in enumerate(data_loader):
                 t_inputs = [t_sample_batched[col].to(self.device) for col in self.inputs_cols]
                 t_outputs = self.model(t_inputs)
+                return torch.argmax(t_outputs)
                 
                 
     def run(self, text):
@@ -225,9 +226,17 @@ class Instructor:
         optimizer = self.optimizer(_params, lr=self.learning_rate, weight_decay=self.l2reg)
         
         
-        # token = Tokenizer(max_seq_len = 80)
-        # token.fit_on_text(text)
-        # test_data = DataLoader(dataset=text, batch_size=16,shuffle=False)
+        token = Tokenizer(max_seq_len = 80)
+        token.fit_on_text(text[0])
+
+        embedd_m = build_embedding_matrix(
+            word2idx=token.word2idx,
+            embed_dim=300,
+            dat_fname='{0}_embedding_matrix.dat'.format(str(self.embed_dim)))
+        
+        
+        test = Dat(text[0], token)
+        test_data = DataLoader(dataset=test, batch_size=16,shuffle=False)
         
         
         train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.batch_size, shuffle=True)
@@ -235,12 +244,18 @@ class Instructor:
         val_data_loader = DataLoader(dataset=self.valset, batch_size=self.batch_size, shuffle=False)
 
         self._reset_params()
-        best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
+        if not os.path.exists('G:/SentimentAnalysis/state_dict/{}_train_val_acc'.format(self.model_name)):
+            best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
+        else:
+            best_model_path = 'G:/SentimentAnalysis/state_dict/{}_train_val_acc'.format(self.model_name)
+            
         self.model.load_state_dict(torch.load(best_model_path))
         self.model.eval()
-
+ 
         test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
-        logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))    
+        #logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))  
+        out = self._predict(test_data)
+        return out.item()
 
 # def main():
     # # Hyper Parameters

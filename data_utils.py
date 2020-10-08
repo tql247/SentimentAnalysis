@@ -24,6 +24,16 @@ class Tokenizer(object):
                 self.idx2word[self.idx] = word
                 self.idx += 1
 
+    def text_to_seq(self, text, reverse=False, padding='post', truncating='post'):
+        words = text.split()
+        unknownidx = len(self.word2idx)+1
+        sequence = [self.word2idx[w] if w in self.word2idx else unknownidx for w in words]
+        if len(sequence) == 0:
+            sequence = [0]
+        if reverse:
+            sequence = sequence[::-1]
+        return pad_and_truncate(sequence, self.max_seq_len, padding=padding, truncating=truncating)
+            
     def text_to_sequence(self, text, reverse=False, padding='post', truncating='post'):
         if self.lower:
             text = text.lower()
@@ -35,7 +45,19 @@ class Tokenizer(object):
         if reverse:
             sequence = sequence[::-1]
         return pad_and_truncate(sequence, self.max_seq_len, padding=padding, truncating=truncating)
+class Dat(Dataset):
+    def __init__(self, text, tokenizer):
+        text_raw_indices = tokenizer.text_to_seq(text)
+        data = {'text_raw_indices': text_raw_indices}
+        all_data = []
+        all_data.append(data)
+        self.data = all_data
+    def __getitem__(self, index):
+        return self.data[index]
 
+    def __len__(self):
+        return len(self.data)
+        
 class SADataset(Dataset):
     def __init__(self, fname, tokenizer):
         fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
@@ -51,11 +73,11 @@ class SADataset(Dataset):
             # print("pol: ", pol)
             text_raw_indices = tokenizer.text_to_sequence(text)
             if pol == 'positive':
-                polarity = 1
-            elif pol == 'negative':
                 polarity = -1
-            else:
+            elif pol == 'negative':
                 polarity = 0
+            else:
+                polarity = 1
                 
             polarity = int(polarity) + 1
 
@@ -99,14 +121,14 @@ def _load_word_vec(path, word2idx=None):
 
 def build_embedding_matrix(word2idx, embed_dim, dat_fname):
     if os.path.exists(dat_fname):
-        print('loading embedding_matrix:', dat_fname)
+        # print('loading embedding_matrix:', dat_fname)
         embedding_matrix = pickle.load(open(dat_fname, 'rb'))
     else:
-        print('loading word vectors...')
+        # print('loading word vectors...')
         embedding_matrix = np.zeros((len(word2idx) + 2, embed_dim))  # idx 0 and len(word2idx)+1 are all-zeros
         fname = './cc.vi.300.vec'
         word_vec = _load_word_vec(fname, word2idx=word2idx)
-        print('building embedding_matrix:', dat_fname)
+        # print('building embedding_matrix:', dat_fname)
         for word, i in word2idx.items():
             vec = word_vec.get(word)
             if vec is not None:
@@ -118,7 +140,7 @@ def build_embedding_matrix(word2idx, embed_dim, dat_fname):
 
 def build_tokenizer(fnames, max_seq_len, dat_fname):
     if os.path.exists(dat_fname):
-        print('loading tokenizer:', dat_fname)
+        #       print('loading tokenizer:', dat_fname)
         tokenizer = pickle.load(open(dat_fname, 'rb'))
     else:
         text = ''
