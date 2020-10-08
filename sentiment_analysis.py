@@ -5,9 +5,11 @@ from train import Instructor
 
 def SentimentAnalysis(param, text):
     if param['model'] == 'cnn':
-        cnn_predict(text)
+        out = cnn_predict(text)
+        return out
     else:
         ins = Instructor(model_name = param['model'])
-        ins.run()
+        out = ins.run(text)
+        return out
         
         

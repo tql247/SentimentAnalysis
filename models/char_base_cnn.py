@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import random
 import time
 import torchtext
 
@@ -93,6 +94,8 @@ def read_data(corpus_file, datafields, label_column, doc_start):
         examples = []
         for line in f:
             columns = line.strip().split(',')
+            if columns[1] == 'comment':
+                continue
             doc = columns[1]      
             label = columns[-1]
             examples.append(torchtext.data.Example.fromlist([doc, label], datafields))
@@ -103,111 +106,151 @@ def evaluate_validation(scores, loss_function, gold):
     n_correct = (guesses == gold).sum().item()
     return n_correct, loss_function(scores, gold).item()
     
-def cnn_predict(text=''):
+def cnn_predict(text):
     # NOTE that the tokenization is done differently here compared to the previous examples.
     # The output of this tokenization will be a sequence of 1014 characters.
 
+    
     TEXT = torchtext.data.Field(sequential=True, tokenize=list, fix_length=1014)
     LABEL = torchtext.data.LabelField(is_target=True)
     datafields = [('text', TEXT), ('label', LABEL)]
-    
+        
     data = read_data('G:/SentimentAnalysis/Preprocess/clear.csv', datafields, label_column=1, doc_start=3)
-    train, valid = data.split([0.85, 0.15])
+    random.seed(5)
+    train, valid = data.split([0.8, 0.2],random_state=random.getstate())
 
     TEXT.build_vocab(train, max_size=10000)
     LABEL.build_vocab(train)
-    
-    model = CharCNNTextClassifier(TEXT, LABEL)
 
+    # print("=" * 100)
+    # print("VOCAB FREQUENCY")
+    # print(TEXT.vocab.freqs)  # freq
+    # print("=" * 100)
+    # print("VOCAB NUMBERING")
+    # print(TEXT.vocab.stoi)  # Index
+    # print("=" * 100)
+    # print("LABEL:", LABEL.vocab.stoi)  # Index
+    # print("=" * 100)
+    
     device = 'cuda'
-    model.to(device)
     
-    train_iterator = torchtext.data.BucketIterator(
-        train,
-        device=device,
-        batch_size=128,
-        sort_key=lambda x: len(x.text),
-        repeat=False,
-        train=True)
+    if not os.path.exists('G:/SentimentAnalysis/cnn.model'):
     
-    valid_iterator = torchtext.data.Iterator(
-        valid,
+        model = CharCNNTextClassifier(TEXT, LABEL)
+        
+        model.to(device)
+
+        train_iterator = torchtext.data.BucketIterator(
+            train,
+            device=device,
+            batch_size=128,
+            sort_key=lambda x: len(x.text),
+            repeat=False,
+            train=True)
+
+        valid_iterator = torchtext.data.Iterator(
+            valid,
+            device=device,
+            batch_size=128,
+            repeat=False,
+            train=False,
+            sort=False)
+
+        loss_function = torch.nn.CrossEntropyLoss()
+        learning_rate = 0.0005
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+        train_batches = list(train_iterator)
+        valid_batches = list(valid_iterator)
+
+        history = defaultdict(list)
+
+        print('training...')
+        for i in range(1, 31):
+            
+            t0 = time.time()
+            
+            loss_sum = 0
+            n_batches = 0
+
+            model.train()
+            
+            for batch in train_batches:
+                scores = model(batch.text)
+                loss = loss_function(scores, batch.label)
+
+                optimizer.zero_grad()            
+                loss.backward()
+                optimizer.step()
+        
+                loss_sum += loss.item()
+                n_batches += 1
+            
+            train_loss = loss_sum / n_batches
+            history['train_loss'].append(train_loss)
+            
+            n_correct = 0
+            n_valid = len(valid)
+            loss_sum = 0
+            n_batches = 0
+            
+            model.eval()
+            
+            for batch in valid_batches:
+                scores = model(batch.text)
+                n_corr_batch, loss_batch = evaluate_validation(scores, loss_function, batch.label)
+                loss_sum += loss_batch
+                n_correct += n_corr_batch
+                n_batches += 1
+            val_acc = n_correct / n_valid
+            val_loss = loss_sum / n_batches
+
+            history['val_loss'].append(val_loss)
+            history['val_acc'].append(val_acc)        
+            
+            t1 = time.time()
+            print(f'Epoch {i}: train loss = {train_loss:.4f}, val loss = {val_loss:.4f}, val acc: {val_acc:.4f}, time = {t1-t0:.4f}')
+
+            if i % 5 == 0:
+                learning_rate *= 0.5
+                print(f'Setting the learning rate to {learning_rate}.')
+                for g in optimizer.param_groups:
+                    g['lr'] = learning_rate            
+                
+            
+        torch.save(model, 'G:/SentimentAnalysis/cnn.model')     
+        plt.plot(history['train_loss'])
+        plt.plot(history['val_loss'])
+        plt.plot(history['val_acc'])
+        plt.legend(['training loss', 'validation loss', 'validation accuracy'])
+        plt.savefig('cnn.png')
+
+    else:
+        model = torch.load('G:/SentimentAnalysis/cnn.model')
+        
+    label = ['Normal']
+    data = []
+    data.append(torchtext.data.Example.fromlist([text[0], label[0]], datafields))
+    predict = torchtext.data.Dataset(data, datafields)
+
+    predict_iterator = torchtext.data.Iterator(
+        predict,
         device=device,
         batch_size=128,
         repeat=False,
         train=False,
         sort=False)
-
-    loss_function = torch.nn.CrossEntropyLoss()
-    learning_rate = 0.0005
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    print(f'Setting the learning rate to {learning_rate}.')
+    predict_batches = list(predict_iterator)    
+    for batch in predict_batches:
+        scores = model(batch.text)
+        print("SCORE: ", scores)
+        print("Predict: ", scores.argmax(dim=1))
+        # print("ONE HOT MATRIX")
+        # print(batch.text.tolist())
+        print("=" * 100)
+    return scores.argmax(dim=1).item()
     
-    train_batches = list(train_iterator)
-    valid_batches = list(valid_iterator)
-    
-    history = defaultdict(list)
-    
-    for i in range(1, 31):
-        
-        t0 = time.time()
-        
-        loss_sum = 0
-        n_batches = 0
 
-        model.train()
-        
-        for batch in train_batches:
-            scores = model(batch.text)
-            loss = loss_function(scores, batch.label)
-
-            optimizer.zero_grad()            
-            loss.backward()
-            optimizer.step()
-    
-            loss_sum += loss.item()
-            n_batches += 1
-        
-        train_loss = loss_sum / n_batches
-        history['train_loss'].append(train_loss)
-        
-        n_correct = 0
-        n_valid = len(valid)
-        loss_sum = 0
-        n_batches = 0
-        
-        torch.save(model.state_dict(), 'G:/SentimentAnalysis/cnn.pth')
-        
-        model.eval()
-        
-        for batch in valid_batches:
-            scores = model(batch.text)
-            n_corr_batch, loss_batch = evaluate_validation(scores, loss_function, batch.label)
-            loss_sum += loss_batch
-            n_correct += n_corr_batch
-            n_batches += 1
-        val_acc = n_correct / n_valid
-        val_loss = loss_sum / n_batches
-
-        history['val_loss'].append(val_loss)
-        history['val_acc'].append(val_acc)        
-        
-        t1 = time.time()
-        print(f'Epoch {i}: train loss = {train_loss:.4f}, val loss = {val_loss:.4f}, val acc: {val_acc:.4f}, time = {t1-t0:.4f}')
-
-        if i % 5 == 0:
-            learning_rate *= 0.5
-            print(f'Setting the learning rate to {learning_rate}.')
-            for g in optimizer.param_groups:
-                g['lr'] = learning_rate            
-            
-        
-         
-    plt.plot(history['train_loss'])
-    plt.plot(history['val_loss'])
-    plt.plot(history['val_acc'])
-    plt.legend(['training loss', 'validation loss', 'validation accuracy'])
-    plt.savefig('cnn.png')
     
     
 # cnn_predict(['máy tốt thật sự',

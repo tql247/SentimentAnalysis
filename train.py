@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 
-from data_utils import build_tokenizer, build_embedding_matrix, SADataset
+from data_utils import build_tokenizer, build_embedding_matrix, SADataset, Tokenizer
 
 from models.lstm import LSTM
 from models.rnn import RNN
@@ -25,9 +25,6 @@ import matplotlib.pyplot as plt
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
-
-
-
 
 class Instructor:
     def __init__(self, model_name='lstm', dataset='train', optimizer='adam',initializer='xavier_uniform_',
@@ -94,18 +91,19 @@ class Instructor:
         
         
         
-        tokenizer = build_tokenizer(
+        self.tokenizer = build_tokenizer(
             fnames=[self.dataset_file['train'], self.dataset_file['test']],
             max_seq_len=self.max_seq_len,
             dat_fname='{0}_tokenizer.dat'.format(self.dataset))
-        embedding_matrix = build_embedding_matrix(
-            word2idx=tokenizer.word2idx,
+        self.embedding_matrix = build_embedding_matrix(
+            word2idx=self.tokenizer.word2idx,
             embed_dim=self.embed_dim,
             dat_fname='{0}_{1}_embedding_matrix.dat'.format(str(self.embed_dim), self.dataset))
-        self.model = self.model_class(embedding_matrix, self).to(self.device)
+        self.model = self.model_class(self.embedding_matrix, self).to(self.device)
 
-        self.trainset = SADataset(self.dataset_file['train'], tokenizer)
-        self.testset = SADataset(self.dataset_file['test'], tokenizer)
+        self.trainset = SADataset(self.dataset_file['train'], self.tokenizer)
+        print(self.trainset)
+        self.testset = SADataset(self.dataset_file['test'], self.tokenizer)
         assert 0 <= self.valset_ratio < 1
         if self.valset_ratio > 0:
             valset_len = int(len(self.trainset) * self.valset_ratio)
@@ -172,7 +170,7 @@ class Instructor:
         plt.plot(history['val_acc'])
         plt.plot(history['val_f1'])
         plt.legend(['training loss', 'training accuracy', 'validation accuracy', 'validation f1'])
-        plt.savefig('lstm.png')
+        plt.savefig(str(self.model_name) + '.png')
         return path
 
     def _reset_params(self):
@@ -211,13 +209,27 @@ class Instructor:
         f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1, 2],
                               average='macro')
         return acc, f1
-
-    def run(self):
+        
+    def _predict(self, data_loader):
+        self.model.eval()
+        with torch.no_grad():
+            for t_batch, t_sample_batched in enumerate(data_loader):
+                t_inputs = [t_sample_batched[col].to(self.device) for col in self.inputs_cols]
+                t_outputs = self.model(t_inputs)
+                
+                
+    def run(self, text):
         # Loss and Optimizer
         criterion = nn.CrossEntropyLoss()
         _params = filter(lambda p: p.requires_grad, self.model.parameters())
         optimizer = self.optimizer(_params, lr=self.learning_rate, weight_decay=self.l2reg)
-
+        
+        
+        # token = Tokenizer(max_seq_len = 80)
+        # token.fit_on_text(text)
+        # test_data = DataLoader(dataset=text, batch_size=16,shuffle=False)
+        
+        
         train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.batch_size, shuffle=True)
         test_data_loader = DataLoader(dataset=self.testset, batch_size=self.batch_size, shuffle=False)
         val_data_loader = DataLoader(dataset=self.valset, batch_size=self.batch_size, shuffle=False)
@@ -226,6 +238,7 @@ class Instructor:
         best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
         self.model.load_state_dict(torch.load(best_model_path))
         self.model.eval()
+
         test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
         logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))    
 

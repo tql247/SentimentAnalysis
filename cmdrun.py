@@ -1,10 +1,19 @@
 from sentiment_analysis import SentimentAnalysis as sa
 
-
-param = {'model' : 'lstm',
-         'textprocessor' : 'word',
+param = {'model' : 'cnn',
+         'textprocessor' : 'character',
          'activation' : 'linear',
          'loss' : 'crossEntropy'}
          
-text = 'phim hay vcl'
-sa(param, text)
+text = ['không hiểu chơi liên quân nó cứ giật trong khi fps bình thường còn wifi thì k vấn đề']
+out = sa(param, text)
+#{'Positive': 0, 'Negative': 1, 'Normal': 2}
+if out == 0:
+    print("Text: {}".format(text[0]))
+    print("Predict: Positive")
+if out == 1:
+    print("Text: {}".format(text[0]))
+    print("Predict: Negative")
+if out == 2:
+    print("Text: {}".format(text[0]))
+    print("Predict: Normal")
