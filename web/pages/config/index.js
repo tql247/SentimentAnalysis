@@ -10,12 +10,12 @@ export default {
             {
               title: '...',
               isPick: false,
-              des: 'a'
+              des: 'Word'
             },
             {
               title: '...',
               isPick: true,
-              des: 'asdas'
+              des: 'Character'
             }
           ]
         },
@@ -23,17 +23,17 @@ export default {
           header: 'Model',
           option: [
             {
-              title: 'MGAN',
+              title: '...',
               isPick: true,
               des: '1231dzda'
             },
             {
-              title: 'LSTM',
+              title: '...',
               isPick: false,
               des: '12dA34'
             },
             {
-              title: 'TNet',
+              title: '... .................',
               isPick: false,
               des: '12FAFAWE  E34'
             }
@@ -43,12 +43,17 @@ export default {
           header: 'Active funtion',
           option: [
             {
-              title: 'Cos Sin',
+              title: '...',
               isPick: false,
               des: '12AVCSC AAS34'
             },
             {
-              title: 'Sigmod',
+              title: '...',
+              isPick: false,
+              des: '1 ASDASD ASD234'
+            },
+            {
+              title: '...',
               isPick: true,
               des: '1 ASDASD ASD234'
             }
@@ -80,18 +85,58 @@ export default {
           ]
         }
       ],
-      showDescription: 'abc'
+      showDescription: 'abc',
+      Embedding: 'a',
+      Model: 'v',
+      activeFunc: 'as',
+      lossFunc: '1'
     }
   },
   computed: {},
   methods: {
-    changeOption(ls, newPick) {
-      console.log(ls)
+    changeOption(header, ls, newPick) {
       for (let i = 0; i < ls.length; i++) {
         ls[i].isPick = false
       }
-
       newPick.isPick = true
+
+      switch (header) {
+        case 'Embedding':
+          this.Embedding = newPick
+          break
+
+        case 'Model':
+          this.Model = newPick
+          break
+      }
+    },
+    async requestOption() {
+      const param = {
+        embedding: this.Embedding,
+        model: this.Model,
+        active: this.activeFunc,
+        loss: this.lossFunc
+      }
+
+      const axios = require('axios')
+      const data = JSON.stringify(param)
+
+      const config = {
+        method: 'post',
+        url: 'http://localhost/setter',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data
+      }
+
+      await axios(config)
+        .then(function(response) {
+          console.log(JSON.stringify(response.data))
+        })
+        .catch(function(error) {
+          console.log(error)
+        })
     },
     previewFeature(option) {
       this.showDescription = option.des

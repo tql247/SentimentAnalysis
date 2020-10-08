@@ -1,20 +1,34 @@
 .page-content {
     font-family: Georgia, 'Times New Roman', Times, serif;
-    height: 100vh;
+    // height: 100vh;
     overflow: auto;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     overflow-y: hidden;
 
+    .page-bg {
+        background-color: #F3F4F7;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    
+
+    .fit-height{
+        height: fit-content;
+    }
+
     .app-content {
         padding: 10px;
         width: 100%;
+        z-index: 10;
         display: flex;
         justify-content: center;
         overflow: auto;
         margin: 0;
-        background-color: #F3F4F7;
 
         .intro {
             padding: 10px;

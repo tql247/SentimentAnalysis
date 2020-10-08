@@ -3,10 +3,53 @@ export default {
   data() {
     return {
       predict: 'Positive',
-      prob: 0.98,
-      isLoading: false
+      prob: '...',
+      isLoading: false,
+      predictImg: '/smile.png'
     }
   },
   computed: {},
-  methods: {}
+  methods: {
+    async getPredict() {
+      this.isLoading = true
+      const axios = require('axios')
+
+      const config = {
+        method: 'get',
+        url: 'http://localhost/sean/haha',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      }
+
+      try {
+        const response = await axios(config)
+        const resVal = response.data.label
+        console.log(resVal)
+
+        switch (resVal) {
+          case 'Negative':
+            this.predict = 'Negative'
+            this.predictImg = '/neg.png'
+            break
+
+          case 'Normal':
+            this.predict = 'Normal'
+            this.predictImg = '/nor.png'
+            break
+
+          case 'Positive':
+            this.predict = 'Positive'
+            this.predictImg = '/smile.png'
+            break
+        }
+      } catch (e) {
+        this.$toast.error(e)
+      }
+
+      this.isLoading = false
+    }
+  }
 }
