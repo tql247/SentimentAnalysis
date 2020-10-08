@@ -126,10 +126,9 @@ def build_tokenizer(fnames, max_seq_len, dat_fname):
             fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
             lines = fin.readlines()
             fin.close()
-            for i in range(0, len(lines), 3):
-                text_left, _, text_right = [s.lower().strip() for s in lines[i].partition("$T$")]
-                aspect = lines[i + 1].lower().strip()
-                text_raw = text_left + " " + aspect + " " + text_right
+            for i in range(0, len(lines)):
+                data = [s.lower().strip() for s in lines[i].split(',')]
+                text_raw = data[1]
                 text += text_raw + " "
 
         tokenizer = Tokenizer(max_seq_len)
