@@ -1,6 +1,5 @@
 import math
 import os
-import argparse
 import sys
 from time import strftime, localtime
 import random
@@ -13,50 +12,120 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 
-from data_utils import build_tokenizer, build_embedding_matrix, ABSADataset
+from data_utils import build_tokenizer, build_embedding_matrix, SADataset
 
 from models.lstm import LSTM
-from models.CharCNNTextClassifier import CharCNNTextClassifier
+from models.rnn import RNN
+from models.char_base_cnn import CharCNNTextClassifier
 from models.dynamic_lstm import DynamicLSTM
+
+from collections import defaultdict
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
-class Instructor:
-    def __init__(self, opt):
-        self.opt = opt
 
+
+
+class Instructor:
+    def __init__(self, model_name='lstm', dataset='train', optimizer='adam',initializer='xavier_uniform_',
+                learning_rate=2e-5, dropout=0.1, l2reg=0.01, num_epoch=10, batch_size=16, log_step=5, embed_dim=300,
+                hidden_dim=300, max_seq_len=80, polarities_dim=3, device=None, valset_ratio=0):
+        self.model_name = model_name
+        self.dataset = dataset
+        self.optimizer = optimizer
+        self.initializer = initializer
+        self.learning_rate = learning_rate
+        self.dropout = dropout
+        self.l2reg = l2reg
+        self.num_epoch = num_epoch
+        self.batch_size = batch_size
+        self.log_step = log_step
+        self.embed_dim = embed_dim
+        self.hidden_dim = hidden_dim
+        self.max_seq_len = max_seq_len
+        self.polarities_dim = polarities_dim
+        self.device = device
+        self.valset_ratio = valset_ratio
+       
+        log_file = '{}-{}-{}.log'.format(self.model_name, self.dataset, strftime("%y%m%d-%H%M", localtime()))
+        logger.addHandler(logging.FileHandler(log_file))
+        
+        model_classes = {
+            'lstm': LSTM,
+            'rnn' : RNN
+        }
+        dataset_files = {
+            'train': {
+                'train': './Preprocess/train.csv',
+                'test': './Preprocess/test.csv'
+            }
+        }
+        input_colses = {
+            'lstm': ['text_raw_indices'],
+            'rnn': ['text_raw_indices']
+        }
+        initializers = {
+            'xavier_uniform_': torch.nn.init.xavier_uniform_,
+            'xavier_normal_': torch.nn.init.xavier_normal,
+            'orthogonal_': torch.nn.init.orthogonal_,
+        }
+        optimizers = {
+            'adadelta': torch.optim.Adadelta,  # default lr=1.0
+            'adagrad': torch.optim.Adagrad,  # default lr=0.01
+            'adam': torch.optim.Adam,  # default lr=0.001
+            'adamax': torch.optim.Adamax,  # default lr=0.002
+            'asgd': torch.optim.ASGD,  # default lr=0.01
+            'rmsprop': torch.optim.RMSprop,  # default lr=0.01
+            'sgd': torch.optim.SGD,
+        }
+
+        
+        
+        self.model_class = model_classes[self.model_name]
+        self.dataset_file = dataset_files[self.dataset]
+        self.inputs_cols = input_colses[self.model_name]
+        self.initializer = initializers[self.initializer]
+        self.optimizer = optimizers[self.optimizer]
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') \
+            if self.device is None else torch.device(self.device)
+        
+        
+        
         tokenizer = build_tokenizer(
-            fnames=[opt.dataset_file['train'], opt.dataset_file['test']],
-            max_seq_len=opt.max_seq_len,
-            dat_fname='{0}_tokenizer.dat'.format(opt.dataset))
+            fnames=[self.dataset_file['train'], self.dataset_file['test']],
+            max_seq_len=self.max_seq_len,
+            dat_fname='{0}_tokenizer.dat'.format(self.dataset))
         embedding_matrix = build_embedding_matrix(
             word2idx=tokenizer.word2idx,
-            embed_dim=opt.embed_dim,
-            dat_fname='{0}_{1}_embedding_matrix.dat'.format(str(opt.embed_dim), opt.dataset))
-        self.model = opt.model_class(embedding_matrix, opt).to(opt.device)
+            embed_dim=self.embed_dim,
+            dat_fname='{0}_{1}_embedding_matrix.dat'.format(str(self.embed_dim), self.dataset))
+        self.model = self.model_class(embedding_matrix, self).to(self.device)
 
-        self.trainset = ABSADataset(opt.dataset_file['train'], tokenizer)
-        self.testset = ABSADataset(opt.dataset_file['test'], tokenizer)
-        assert 0 <= opt.valset_ratio < 1
-        if opt.valset_ratio > 0:
-            valset_len = int(len(self.trainset) * opt.valset_ratio)
+        self.trainset = SADataset(self.dataset_file['train'], tokenizer)
+        self.testset = SADataset(self.dataset_file['test'], tokenizer)
+        assert 0 <= self.valset_ratio < 1
+        if self.valset_ratio > 0:
+            valset_len = int(len(self.trainset) * self.valset_ratio)
             self.trainset, self.valset = random_split(self.trainset, (len(self.trainset) - valset_len, valset_len))
         else:
             self.valset = self.testset
+        logger.info('Model selected: {}'.format(self.model_name))
+        if self.device.type == 'cuda':
+            logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=self.device.index)))
 
-        if opt.device.type == 'cuda':
-            logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=opt.device.index)))
-        self._print_args()
-
+    # def predict(self, text):
+        # predict = self.model(
     def _train(self, criterion, optimizer, train_data_loader, val_data_loader):
         max_val_acc = 0
         max_val_f1 = 0
         global_step = 0
         path = None
-        for epoch in range(self.opt.num_epoch):
-            logger.info('>' * 100)
+        history = defaultdict(list)
+        for epoch in range(self.num_epoch):
+            #logger.info('>' * 100)
             logger.info('epoch: {}'.format(epoch))
             n_correct, n_total, loss_total = 0, 0, 0
             # switch model to training mode
@@ -66,9 +135,9 @@ class Instructor:
                 # clear gradient accumulators
                 optimizer.zero_grad()
 
-                inputs = [sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
+                inputs = [sample_batched[col].to(self.device) for col in self.inputs_cols]
                 outputs = self.model(inputs)
-                targets = sample_batched['polarity'].to(self.opt.device)
+                targets = sample_batched['polarity'].to(self.device)
 
                 loss = criterion(outputs, targets)
                 loss.backward()
@@ -77,45 +146,41 @@ class Instructor:
                 n_correct += (torch.argmax(outputs, -1) == targets).sum().item()
                 n_total += len(outputs)
                 loss_total += loss.item() * len(outputs)
-                if global_step % self.opt.log_step == 0:
+                if global_step % self.log_step == 0:
                     train_acc = n_correct / n_total
                     train_loss = loss_total / n_total
-                    logger.info('loss: {:.4f}, acc: {:.4f}'.format(train_loss, train_acc))
+            logger.info('loss: {:.4f}, acc: {:.4f}'.format(train_loss, train_acc))
+            
+            history['train_loss'].append(train_loss)
+            history['train_acc'].append(train_acc)
 
             val_acc, val_f1 = self._evaluate_acc_f1(val_data_loader)
+            history['val_acc'].append(val_acc)
+            history['val_f1'].append(val_f1)
             logger.info('> val_acc: {:.4f}, val_f1: {:.4f}'.format(val_acc, val_f1))
             if val_acc > max_val_acc:
                 max_val_acc = val_acc
                 if not os.path.exists('state_dict'):
                     os.mkdir('state_dict')
-                path = 'state_dict/{0}_{1}_val_acc{2}'.format(self.opt.model_name, self.opt.dataset, round(val_acc, 4))
+                path = 'state_dict/{0}_{1}_val_acc{2}'.format(self.model_name, self.dataset, round(val_acc, 4))
                 torch.save(self.model.state_dict(), path)
                 logger.info('>> saved: {}'.format(path))
             if val_f1 > max_val_f1:
                 max_val_f1 = val_f1
-
+        plt.plot(history['train_loss'])
+        plt.plot(history['train_acc'])
+        plt.plot(history['val_acc'])
+        plt.plot(history['val_f1'])
+        plt.legend(['training loss', 'training accuracy', 'validation accuracy', 'validation f1'])
+        plt.savefig('lstm.png')
         return path
-
-    def _print_args(self):
-        n_trainable_params, n_nontrainable_params = 0, 0
-        for p in self.model.parameters():
-            n_params = torch.prod(torch.tensor(p.shape))
-            if p.requires_grad:
-                n_trainable_params += n_params
-            else:
-                n_nontrainable_params += n_params
-        logger.info(
-            'n_trainable_params: {0}, n_nontrainable_params: {1}'.format(n_trainable_params, n_nontrainable_params))
-        logger.info('> training arguments:')
-        for arg in vars(self.opt):
-            logger.info('>>> {0}: {1}'.format(arg, getattr(self.opt, arg)))
 
     def _reset_params(self):
         for child in self.model.children():
             for p in child.parameters():
                 if p.requires_grad:
                     if len(p.shape) > 1:
-                        self.opt.initializer(p)
+                        self.initializer(p)
                     else:
                         stdv = 1. / math.sqrt(p.shape[0])
                         torch.nn.init.uniform_(p, a=-stdv, b=stdv)
@@ -124,11 +189,12 @@ class Instructor:
         n_correct, n_total = 0, 0
         t_targets_all, t_outputs_all = None, None
         # switch model to evaluation mode
+        history = defaultdict(list)
         self.model.eval()
         with torch.no_grad():
             for t_batch, t_sample_batched in enumerate(data_loader):
-                t_inputs = [t_sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
-                t_targets = t_sample_batched['polarity'].to(self.opt.device)
+                t_inputs = [t_sample_batched[col].to(self.device) for col in self.inputs_cols]
+                t_targets = t_sample_batched['polarity'].to(self.device)
                 t_outputs = self.model(t_inputs)
 
                 n_correct += (torch.argmax(t_outputs, -1) == t_targets).sum().item()
@@ -150,122 +216,22 @@ class Instructor:
         # Loss and Optimizer
         criterion = nn.CrossEntropyLoss()
         _params = filter(lambda p: p.requires_grad, self.model.parameters())
-        optimizer = self.opt.optimizer(_params, lr=self.opt.learning_rate, weight_decay=self.opt.l2reg)
+        optimizer = self.optimizer(_params, lr=self.learning_rate, weight_decay=self.l2reg)
 
-        train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.opt.batch_size, shuffle=True)
-        test_data_loader = DataLoader(dataset=self.testset, batch_size=self.opt.batch_size, shuffle=False)
-        val_data_loader = DataLoader(dataset=self.valset, batch_size=self.opt.batch_size, shuffle=False)
+        train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.batch_size, shuffle=True)
+        test_data_loader = DataLoader(dataset=self.testset, batch_size=self.batch_size, shuffle=False)
+        val_data_loader = DataLoader(dataset=self.valset, batch_size=self.batch_size, shuffle=False)
 
         self._reset_params()
         best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
         self.model.load_state_dict(torch.load(best_model_path))
         self.model.eval()
         test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
-        logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))
+        logger.info('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))    
 
 def main():
     # Hyper Parameters
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', default='bert_spc', type=str)
-    parser.add_argument('--dataset', default='laptop', type=str, help='twitter, restaurant, laptop')
-    parser.add_argument('--optimizer', default='adam', type=str)
-    parser.add_argument('--initializer', default='xavier_uniform_', type=str)
-    parser.add_argument('--learning_rate', default=2e-5, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
-    parser.add_argument('--dropout', default=0.1, type=float)
-    parser.add_argument('--l2reg', default=0.01, type=float)
-    parser.add_argument('--num_epoch', default=10, type=int, help='try larger number for non-BERT models')
-    parser.add_argument('--batch_size', default=16, type=int, help='try 16, 32, 64 for BERT models')
-    parser.add_argument('--log_step', default=5, type=int)
-    parser.add_argument('--embed_dim', default=300, type=int)
-    parser.add_argument('--hidden_dim', default=300, type=int)
-    parser.add_argument('--bert_dim', default=768, type=int)
-    parser.add_argument('--pretrained_bert_name', default='bert-base-uncased', type=str)
-    parser.add_argument('--max_seq_len', default=80, type=int)
-    parser.add_argument('--polarities_dim', default=3, type=int)
-    parser.add_argument('--hops', default=3, type=int)
-    parser.add_argument('--device', default=None, type=str, help='e.g. cuda:0')
-    parser.add_argument('--seed', default=None, type=int, help='set seed for reproducibility')
-    parser.add_argument('--valset_ratio', default=0, type=float, help='set ratio between 0 and 1 for validation support')
-    # The following parameters are only valid for the lcf-bert model
-    parser.add_argument('--local_context_focus', default='cdm', type=str, help='local context focus mode, cdw or cdm')
-    parser.add_argument('--SRD', default=3, type=int, help='semantic-relative-distance, see the paper of LCF-BERT model')
-    opt = parser.parse_args()
-
-    if opt.seed is not None:
-        random.seed(opt.seed)
-        numpy.random.seed(opt.seed)
-        torch.manual_seed(opt.seed)
-        torch.cuda.manual_seed(opt.seed)
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-
-    model_classes = {
-        'lstm': LSTM,
-        # 'td_lstm': TD_LSTM,
-        # 'tc_lstm': TC_LSTM,
-        # 'atae_lstm': ATAE_LSTM,
-        # default hyper-parameters for LCF-BERT model is as follws:
-        # lr: 2e-5
-        # l2: 1e-5
-        # batch size: 16
-        # num epochs: 5
-    }
-    dataset_files = {
-        'twitter': {
-            'train': './datasets/acl-14-short-data/train.raw',
-            'test': './datasets/acl-14-short-data/test.raw'
-        },
-        'restaurant': {
-            'train': './datasets/semeval14/Restaurants_Train.xml.seg',
-            'test': './datasets/semeval14/Restaurants_Test_Gold.xml.seg'
-        },
-        'laptop': {
-            'train': './datasets/semeval14/Laptops_Train.xml.seg',
-            'test': './datasets/semeval14/Laptops_Test_Gold.xml.seg'
-        }
-    }
-    input_colses = {
-        'lstm': ['text_raw_indices'],
-        'td_lstm': ['text_left_with_aspect_indices', 'text_right_with_aspect_indices'],
-        'tc_lstm': ['text_left_with_aspect_indices', 'text_right_with_aspect_indices', 'aspect_indices'],
-        'atae_lstm': ['text_raw_indices', 'aspect_indices'],
-        'ian': ['text_raw_indices', 'aspect_indices'],
-        'memnet': ['text_raw_without_aspect_indices', 'aspect_indices'],
-        'ram': ['text_raw_indices', 'aspect_indices', 'text_left_indices'],
-        'cabasc': ['text_raw_indices', 'aspect_indices', 'text_left_with_aspect_indices', 'text_right_with_aspect_indices'],
-        'tnet_lf': ['text_raw_indices', 'aspect_indices', 'aspect_in_text'],
-        'aoa': ['text_raw_indices', 'aspect_indices'],
-        'mgan': ['text_raw_indices', 'aspect_indices', 'text_left_indices'],
-        'bert_spc': ['text_bert_indices', 'bert_segments_ids'],
-        'aen_bert': ['text_raw_bert_indices', 'aspect_bert_indices'],
-        'lcf_bert': ['text_bert_indices', 'bert_segments_ids', 'text_raw_bert_indices', 'aspect_bert_indices'],
-    }
-    initializers = {
-        'xavier_uniform_': torch.nn.init.xavier_uniform_,
-        'xavier_normal_': torch.nn.init.xavier_normal,
-        'orthogonal_': torch.nn.init.orthogonal_,
-    }
-    optimizers = {
-        'adadelta': torch.optim.Adadelta,  # default lr=1.0
-        'adagrad': torch.optim.Adagrad,  # default lr=0.01
-        'adam': torch.optim.Adam,  # default lr=0.001
-        'adamax': torch.optim.Adamax,  # default lr=0.002
-        'asgd': torch.optim.ASGD,  # default lr=0.01
-        'rmsprop': torch.optim.RMSprop,  # default lr=0.01
-        'sgd': torch.optim.SGD,
-    }
-    opt.model_class = model_classes[opt.model_name]
-    opt.dataset_file = dataset_files[opt.dataset]
-    opt.inputs_cols = input_colses[opt.model_name]
-    opt.initializer = initializers[opt.initializer]
-    opt.optimizer = optimizers[opt.optimizer]
-    opt.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') \
-        if opt.device is None else torch.device(opt.device)
-
-    log_file = '{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
-    logger.addHandler(logging.FileHandler(log_file))
-
-    ins = Instructor(opt)
+    ins = Instructor(model_name='rnn')
     ins.run()
 
 

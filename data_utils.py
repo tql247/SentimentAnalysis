@@ -44,12 +44,15 @@ class SADataset(Dataset):
 
         all_data = []
         for i in range(0, len(lines)):
-            text , pol = [s.lower().strip() for s in lines[i].split(',')]
-
-            text_raw_indices = tokenizer.text_to_sequence(text_left + " " + aspect + " " + text_right)
-            if pol == 'Positive':
+            data = [s.lower().strip() for s in lines[i].split(',')]
+            text = data[0]
+            pol = data[-1]
+            # print("text: ", text)
+            # print("pol: ", pol)
+            text_raw_indices = tokenizer.text_to_sequence(text)
+            if pol == 'positive':
                 polarity = 1
-            elif pol = 'Negative':
+            elif pol == 'negative':
                 polarity = -1
             else:
                 polarity = 0
@@ -57,68 +60,12 @@ class SADataset(Dataset):
             polarity = int(polarity) + 1
 
             data = {  
-                'aspect_bert_indices': aspect_bert_indices,
-                'polarity': polarity,
-            }
-
-            all_data.append(data)
-        self.data = all_data
-
-    def __getitem__(self, index):
-        return self.data[index]
-
-    def __len__(self):
-        return len(self.data)
-
-
-class ABSADataset(Dataset):
-    def __init__(self, fname, tokenizer):
-        fin = open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
-        lines = fin.readlines()
-        fin.close()
-
-        all_data = []
-        for i in range(0, len(lines), 3):
-            text_left, _, text_right = [s.lower().strip() for s in lines[i].partition("$T$")]
-            aspect = lines[i + 1].lower().strip()
-            polarity = lines[i + 2].strip()
-
-            text_raw_indices = tokenizer.text_to_sequence(text_left + " " + aspect + " " + text_right)
-            text_raw_without_aspect_indices = tokenizer.text_to_sequence(text_left + " " + text_right)
-            text_left_indices = tokenizer.text_to_sequence(text_left)
-            text_left_with_aspect_indices = tokenizer.text_to_sequence(text_left + " " + aspect)
-            text_right_indices = tokenizer.text_to_sequence(text_right, reverse=True)
-            text_right_with_aspect_indices = tokenizer.text_to_sequence(" " + aspect + " " + text_right, reverse=True)
-            aspect_indices = tokenizer.text_to_sequence(aspect)
-            left_context_len = np.sum(text_left_indices != 0)
-            aspect_len = np.sum(aspect_indices != 0)
-            aspect_in_text = torch.tensor([left_context_len.item(), (left_context_len + aspect_len - 1).item()])
-            polarity = int(polarity) + 1
-
-            text_bert_indices = tokenizer.text_to_sequence('[CLS] ' + text_left + " " + aspect + " " + text_right + ' [SEP] ' + aspect + " [SEP]")
-            bert_segments_ids = np.asarray([0] * (np.sum(text_raw_indices != 0) + 2) + [1] * (aspect_len + 1))
-            bert_segments_ids = pad_and_truncate(bert_segments_ids, tokenizer.max_seq_len)
-
-            text_raw_bert_indices = tokenizer.text_to_sequence("[CLS] " + text_left + " " + aspect + " " + text_right + " [SEP]")
-            aspect_bert_indices = tokenizer.text_to_sequence("[CLS] " + aspect + " [SEP]")
-
-            data = {
-                'text_bert_indices': text_bert_indices,
-                'bert_segments_ids': bert_segments_ids,
-                'text_raw_bert_indices': text_raw_bert_indices,
-                'aspect_bert_indices': aspect_bert_indices,
                 'text_raw_indices': text_raw_indices,
-                'text_raw_without_aspect_indices': text_raw_without_aspect_indices,
-                'text_left_indices': text_left_indices,
-                'text_left_with_aspect_indices': text_left_with_aspect_indices,
-                'text_right_indices': text_right_indices,
-                'text_right_with_aspect_indices': text_right_with_aspect_indices,
-                'aspect_indices': aspect_indices,
-                'aspect_in_text': aspect_in_text,
                 'polarity': polarity,
             }
-
+            #print(data['polarity'])    
             all_data.append(data)
+ 
         self.data = all_data
 
     def __getitem__(self, index):
@@ -157,8 +104,7 @@ def build_embedding_matrix(word2idx, embed_dim, dat_fname):
     else:
         print('loading word vectors...')
         embedding_matrix = np.zeros((len(word2idx) + 2, embed_dim))  # idx 0 and len(word2idx)+1 are all-zeros
-        fname = './glove.twitter.27B/glove.twitter.27B.' + str(embed_dim) + 'd.txt' \
-            if embed_dim != 300 else './glove.42B.300d.txt'
+        fname = './cc.vi.300.vec'
         word_vec = _load_word_vec(fname, word2idx=word2idx)
         print('building embedding_matrix:', dat_fname)
         for word, i in word2idx.items():
