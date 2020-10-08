@@ -1,5 +1,5 @@
 <template>
-  <div class="page-content grey lighten-5">
+  <div class="page-content">
     <v-overlay :value="isLoading">
       <div class="process-bar">
         <v-progress-circular
@@ -10,8 +10,8 @@
       </div>
     </v-overlay>
 
-    <v-row class="app-content d-flex">
-      <v-col cols="12" sm="12" md="10" lg="6" xl="6">
+    <v-row class="app-content">
+      <v-col cols="12" sm="12" md="10" lg="6" xl="6" class="fit-height">
         <v-alert class="intro mx-2" dense outlined type="info">
           Với mỗi trường hợp khác nhau nên lựa chọn các phương pháp embedding,
           model, loss và active function sao cho phù hợp.
@@ -28,7 +28,7 @@
                 v-for="(option, key) in item.option"
                 :key="key"
                 :class="'item ' + (option.isPick === true ? 'active' : '')"
-                @click="changeOption(item.option, option)"
+                @click="changeOption(item.header, item.option, option)"
                 @mouseover="previewFeature(option)"
               >
                 <div class="item-content">
@@ -39,7 +39,13 @@
           </div>
         </div>
         <div class="px-1 mt-3 fill-width">
-          <v-btn tile class="fill-width active-btn" depressed color="success">
+          <v-btn
+            tile
+            class="fill-width active-btn"
+            depressed
+            color="success"
+            @click="requestOption()"
+          >
             Use
           </v-btn>
         </div>
@@ -50,6 +56,8 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <div class="page-bg"></div>
   </div>
 </template>
 

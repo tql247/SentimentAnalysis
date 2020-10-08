@@ -85,18 +85,58 @@ export default {
           ]
         }
       ],
-      showDescription: 'abc'
+      showDescription: 'abc',
+      Embedding: 'a',
+      Model: 'v',
+      activeFunc: 'as',
+      lossFunc: '1'
     }
   },
   computed: {},
   methods: {
-    changeOption(ls, newPick) {
-      console.log(ls)
+    changeOption(header, ls, newPick) {
       for (let i = 0; i < ls.length; i++) {
         ls[i].isPick = false
       }
-
       newPick.isPick = true
+
+      switch (header) {
+        case 'Embedding':
+          this.Embedding = newPick
+          break
+
+        case 'Model':
+          this.Model = newPick
+          break
+      }
+    },
+    async requestOption() {
+      const param = {
+        embedding: this.Embedding,
+        model: this.Model,
+        active: this.activeFunc,
+        loss: this.lossFunc
+      }
+
+      const axios = require('axios')
+      const data = JSON.stringify(param)
+
+      const config = {
+        method: 'post',
+        url: 'http://localhost/setter',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data
+      }
+
+      await axios(config)
+        .then(function(response) {
+          console.log(JSON.stringify(response.data))
+        })
+        .catch(function(error) {
+          console.log(error)
+        })
     },
     previewFeature(option) {
       this.showDescription = option.des
