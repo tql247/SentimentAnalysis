@@ -1,0 +1,60 @@
+Model selected: lstm
+epoch: 0
+loss: 0.9758, acc: 0.5327
+> val_acc: 0.7401, val_f1: 0.3217
+>> saved: state_dict/lstm_train_val_acc
+epoch: 1
+loss: 0.7555, acc: 0.7243
+> val_acc: 0.7425, val_f1: 0.3318
+>> saved: state_dict/lstm_train_val_acc
+epoch: 2
+loss: 0.7407, acc: 0.7260
+> val_acc: 0.7448, val_f1: 0.3330
+>> saved: state_dict/lstm_train_val_acc
+epoch: 3
+loss: 0.7256, acc: 0.7264
+> val_acc: 0.7494, val_f1: 0.3349
+>> saved: state_dict/lstm_train_val_acc
+epoch: 4
+loss: 0.6964, acc: 0.7327
+> val_acc: 0.7587, val_f1: 0.3543
+>> saved: state_dict/lstm_train_val_acc
+epoch: 5
+loss: 0.6638, acc: 0.7435
+> val_acc: 0.7610, val_f1: 0.3765
+>> saved: state_dict/lstm_train_val_acc
+epoch: 6
+loss: 0.6017, acc: 0.7658
+> val_acc: 0.7842, val_f1: 0.4764
+>> saved: state_dict/lstm_train_val_acc
+epoch: 7
+loss: 0.5730, acc: 0.7746
+> val_acc: 0.7865, val_f1: 0.4968
+>> saved: state_dict/lstm_train_val_acc
+epoch: 8
+loss: 0.5615, acc: 0.7883
+> val_acc: 0.7842, val_f1: 0.4523
+epoch: 9
+loss: 0.5381, acc: 0.7943
+> val_acc: 0.7541, val_f1: 0.4896
+epoch: 10
+loss: 0.5396, acc: 0.7964
+> val_acc: 0.7935, val_f1: 0.4948
+>> saved: state_dict/lstm_train_val_acc
+epoch: 11
+loss: 0.4967, acc: 0.8137
+> val_acc: 0.7912, val_f1: 0.5138
+epoch: 12
+loss: 0.4949, acc: 0.8101
+> val_acc: 0.7912, val_f1: 0.4902
+epoch: 13
+loss: 0.4769, acc: 0.8172
+> val_acc: 0.8005, val_f1: 0.5209
+>> saved: state_dict/lstm_train_val_acc
+epoch: 14
+loss: 0.4639, acc: 0.8263
+> val_acc: 0.8097, val_f1: 0.5342
+>> saved: state_dict/lstm_train_val_acc
+epoch: 15
+loss: 0.4591, acc: 0.8179
+> val_acc: 0.8074, val_f1: 0.5238

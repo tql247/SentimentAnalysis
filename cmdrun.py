@@ -1,11 +1,11 @@
 from sentiment_analysis import SentimentAnalysis as sa
 
-param = {'model' : 'lstm',
+param = {'model' : 'cnn',
          'textprocessor' : 'character',
          'activation' : 'linear',
          'loss' : 'crossEntropy'}
          
-text = ['chưa mua nhưng nhân viên bên tgdđ tư vấn làm mình hoang mang quá họ nói đồng hồ này có thể đo huyết áp nhưng phải vơi samsung s9 đúng k mọi người']
+text = ['tệ']
 out = sa(param, text)
 #{'Positive': 0, 'Negative': 1, 'Normal': 2}
 if out == 0:

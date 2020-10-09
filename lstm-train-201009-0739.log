@@ -1,0 +1,57 @@
+Model selected: lstm
+epoch: 0
+loss: 0.7814, acc: 0.7351
+> val_acc: 0.7541, val_f1: 0.2956
+>> saved: state_dict/lstm_train_val_acc
+epoch: 1
+loss: 0.7402, acc: 0.7401
+> val_acc: 0.7541, val_f1: 0.2956
+epoch: 2
+loss: 0.7187, acc: 0.7446
+> val_acc: 0.7564, val_f1: 0.3049
+>> saved: state_dict/lstm_train_val_acc
+epoch: 3
+loss: 0.7083, acc: 0.7441
+> val_acc: 0.7564, val_f1: 0.3049
+epoch: 4
+loss: 0.6742, acc: 0.7467
+> val_acc: 0.7564, val_f1: 0.3208
+epoch: 5
+loss: 0.6189, acc: 0.7655
+> val_acc: 0.7703, val_f1: 0.3839
+>> saved: state_dict/lstm_train_val_acc
+epoch: 6
+loss: 0.5775, acc: 0.7827
+> val_acc: 0.7842, val_f1: 0.4260
+>> saved: state_dict/lstm_train_val_acc
+epoch: 7
+loss: 0.5445, acc: 0.7921
+> val_acc: 0.7935, val_f1: 0.4674
+>> saved: state_dict/lstm_train_val_acc
+epoch: 8
+loss: 0.5235, acc: 0.8031
+> val_acc: 0.7796, val_f1: 0.4676
+epoch: 9
+loss: 0.5083, acc: 0.8129
+> val_acc: 0.7865, val_f1: 0.4306
+epoch: 10
+loss: 0.5090, acc: 0.8071
+> val_acc: 0.7981, val_f1: 0.4831
+>> saved: state_dict/lstm_train_val_acc
+epoch: 11
+loss: 0.4758, acc: 0.8207
+> val_acc: 0.7935, val_f1: 0.4866
+epoch: 12
+loss: 0.4660, acc: 0.8323
+> val_acc: 0.7958, val_f1: 0.4836
+epoch: 13
+loss: 0.4496, acc: 0.8331
+> val_acc: 0.7981, val_f1: 0.4845
+epoch: 14
+loss: 0.4370, acc: 0.8431
+> val_acc: 0.7726, val_f1: 0.4851
+epoch: 15
+loss: 0.4305, acc: 0.8446
+> val_acc: 0.7796, val_f1: 0.4983
+127.0.0.1 - - [09/Oct/2020 07:40:56] "[37mGET /sean/to%20ke HTTP/1.1[0m" 200 -
+ * Detected change in 'C:\\Users\\Lian\\Documents\\Workspace\\me\\SentimentAnalysis\\API.py', reloading

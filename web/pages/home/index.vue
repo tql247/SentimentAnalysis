@@ -15,6 +15,7 @@
         <v-col cols="12" sm="12" md="12" lg="8" xl="10">
           <div class="v-align-center">
             <v-text-field
+              v-model="text"
               light
               prepend-inner-icon="mdi-comment"
               label="Input"

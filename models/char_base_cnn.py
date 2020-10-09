@@ -115,7 +115,7 @@ def cnn_predict(text):
     LABEL = torchtext.data.LabelField(is_target=True)
     datafields = [('text', TEXT), ('label', LABEL)]
         
-    data = read_data('G:/SentimentAnalysis/Preprocess/clear.csv', datafields, label_column=1, doc_start=3)
+    data = read_data('./Preprocess/clear.csv', datafields, label_column=1, doc_start=3)
     random.seed(5)
     train, valid = data.split([0.8, 0.2],random_state=random.getstate())
 
@@ -132,9 +132,9 @@ def cnn_predict(text):
     # print("LABEL:", LABEL.vocab.stoi)  # Index
     # print("=" * 100)
     
-    device = 'cuda'
+    device = 'cpu'
     
-    if not os.path.exists('G:/SentimentAnalysis/cnn.model'):
+    if not os.path.exists('./cnn.model'):
     
         model = CharCNNTextClassifier(TEXT, LABEL)
         
@@ -218,15 +218,15 @@ def cnn_predict(text):
                     g['lr'] = learning_rate            
                 
             
-        torch.save(model, 'G:/SentimentAnalysis/cnn.model')     
-        plt.plot(history['train_loss'])
-        plt.plot(history['val_loss'])
-        plt.plot(history['val_acc'])
-        plt.legend(['training loss', 'validation loss', 'validation accuracy'])
-        plt.savefig('cnn.png')
+        torch.save(model, './cnn.model')     
+        # plt.plot(history['train_loss'])
+        # plt.plot(history['val_loss'])
+        # plt.plot(history['val_acc'])
+        # plt.legend(['training loss', 'validation loss', 'validation accuracy'])
+        # plt.savefig('cnn.png')
 
     else:
-        model = torch.load('G:/SentimentAnalysis/cnn.model')
+        model = torch.load('./cnn.model', map_location=torch.device('cpu'))
         
     label = ['Normal']
     data = []

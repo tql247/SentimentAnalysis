@@ -23,19 +23,19 @@ export default {
           header: 'Model',
           option: [
             {
-              title: '...',
+              title: 'CNN',
               isPick: true,
-              des: '1231dzda'
+              des: 'CNN'
             },
             {
-              title: '...',
+              title: 'RNN',
               isPick: false,
-              des: '12dA34'
+              des: 'RNN'
             },
             {
-              title: '... .................',
+              title: 'LSTM',
               isPick: false,
-              des: '12FAFAWE  E34'
+              des: ''
             }
           ]
         },
@@ -43,19 +43,9 @@ export default {
           header: 'Active funtion',
           option: [
             {
-              title: '...',
+              title: 'Linear',
               isPick: false,
-              des: '12AVCSC AAS34'
-            },
-            {
-              title: '...',
-              isPick: false,
-              des: '1 ASDASD ASD234'
-            },
-            {
-              title: '...',
-              isPick: true,
-              des: '1 ASDASD ASD234'
+              des: ''
             }
           ]
         },
@@ -63,33 +53,18 @@ export default {
           header: 'Loss',
           option: [
             {
-              title: '...',
+              title: 'Cross Entropy',
               isPick: true,
-              des: '1FASFwfQW234'
-            },
-            {
-              title: '...',
-              isPick: false,
-              des: 'ffasfasd'
-            },
-            {
-              title: '...',
-              isPick: false,
-              des: 'ASDasdASDASDQE'
-            },
-            {
-              title: '...',
-              isPick: false,
-              des: 'w'
+              des: ''
             }
           ]
         }
       ],
-      showDescription: 'abc',
-      Embedding: 'a',
-      Model: 'v',
-      activeFunc: 'as',
-      lossFunc: '1'
+      showDescription: 'linear',
+      Embedding: 'character',
+      Model: 'lstm',
+      activeFunc: 'linear',
+      lossFunc: 'crossEntropy'
     }
   },
   computed: {},

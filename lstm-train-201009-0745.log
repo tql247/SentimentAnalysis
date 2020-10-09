@@ -1,0 +1,7 @@
+Model selected: lstm
+epoch: 0
+loss: 0.9757, acc: 0.5333
+> val_acc: 0.7425, val_f1: 0.3256
+>> saved: state_dict/lstm_train_val_acc
+epoch: 1
+loss: 0.7399, acc: 0.7307

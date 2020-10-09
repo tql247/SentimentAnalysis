@@ -1,0 +1,60 @@
+Model selected: lstm
+epoch: 0
+loss: 0.8169, acc: 0.6887
+> val_acc: 0.7378, val_f1: 0.3234
+>> saved: state_dict/lstm_train_val_acc
+epoch: 1
+loss: 0.7479, acc: 0.7290
+> val_acc: 0.7425, val_f1: 0.3260
+>> saved: state_dict/lstm_train_val_acc
+epoch: 2
+loss: 0.7383, acc: 0.7308
+> val_acc: 0.7471, val_f1: 0.3293
+>> saved: state_dict/lstm_train_val_acc
+epoch: 3
+loss: 0.7209, acc: 0.7329
+> val_acc: 0.7494, val_f1: 0.3182
+>> saved: state_dict/lstm_train_val_acc
+epoch: 4
+loss: 0.6717, acc: 0.7443
+> val_acc: 0.7517, val_f1: 0.3504
+>> saved: state_dict/lstm_train_val_acc
+epoch: 5
+loss: 0.6292, acc: 0.7530
+> val_acc: 0.7633, val_f1: 0.3746
+>> saved: state_dict/lstm_train_val_acc
+epoch: 6
+loss: 0.5800, acc: 0.7745
+> val_acc: 0.7610, val_f1: 0.4299
+epoch: 7
+loss: 0.5533, acc: 0.7794
+> val_acc: 0.7749, val_f1: 0.4488
+>> saved: state_dict/lstm_train_val_acc
+epoch: 8
+loss: 0.5274, acc: 0.7901
+> val_acc: 0.7703, val_f1: 0.4063
+epoch: 9
+loss: 0.5236, acc: 0.7955
+> val_acc: 0.7749, val_f1: 0.4283
+epoch: 10
+loss: 0.4980, acc: 0.8113
+> val_acc: 0.7657, val_f1: 0.4419
+epoch: 11
+loss: 0.4885, acc: 0.8113
+> val_acc: 0.7796, val_f1: 0.5029
+>> saved: state_dict/lstm_train_val_acc
+epoch: 12
+loss: 0.4656, acc: 0.8239
+> val_acc: 0.7773, val_f1: 0.4856
+epoch: 13
+loss: 0.4551, acc: 0.8237
+> val_acc: 0.7749, val_f1: 0.4728
+epoch: 14
+loss: 0.4423, acc: 0.8268
+> val_acc: 0.7842, val_f1: 0.4750
+>> saved: state_dict/lstm_train_val_acc
+epoch: 15
+loss: 0.4258, acc: 0.8357
+> val_acc: 0.7773, val_f1: 0.5090
+127.0.0.1 - - [09/Oct/2020 07:44:11] "[37mGET /sean/toi%20thich%20cai%20tui%20xach%20nay HTTP/1.1[0m" 200 -
+ * Detected change in 'C:\\Users\\Lian\\Documents\\Workspace\\me\\SentimentAnalysis\\train.py', reloading

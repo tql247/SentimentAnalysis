@@ -20,7 +20,7 @@ from models.char_base_cnn import CharCNNTextClassifier
 from models.dynamic_lstm import DynamicLSTM
 
 from collections import defaultdict
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -165,12 +165,12 @@ class Instructor:
                 logger.info('>> saved: {}'.format(path))
             if val_f1 > max_val_f1:
                 max_val_f1 = val_f1
-        plt.plot(history['train_loss'])
-        plt.plot(history['train_acc'])
-        plt.plot(history['val_acc'])
-        plt.plot(history['val_f1'])
-        plt.legend(['training loss', 'training accuracy', 'validation accuracy', 'validation f1'])
-        plt.savefig(str(self.model_name) + '.png')
+        # plt.plot(history['train_loss'])
+        # plt.plot(history['train_acc'])
+        # plt.plot(history['val_acc'])
+        # plt.plot(history['val_f1'])
+        # plt.legend(['training loss', 'training accuracy', 'validation accuracy', 'validation f1'])
+        # plt.savefig(str(self.model_name) + '.png')
         return path
 
     def _reset_params(self):
@@ -244,10 +244,10 @@ class Instructor:
         val_data_loader = DataLoader(dataset=self.valset, batch_size=self.batch_size, shuffle=False)
 
         self._reset_params()
-        if not os.path.exists('G:/SentimentAnalysis/state_dict/{}_train_val_acc'.format(self.model_name)):
+        if not os.path.exists('./state_dict/{}_train_val_acc'.format(self.model_name)):
             best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
         else:
-            best_model_path = 'G:/SentimentAnalysis/state_dict/{}_train_val_acc'.format(self.model_name)
+            best_model_path = './state_dict/{}_train_val_acc'.format(self.model_name)
             
         self.model.load_state_dict(torch.load(best_model_path))
         self.model.eval()

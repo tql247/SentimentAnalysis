@@ -2,6 +2,7 @@ export default {
   layout: 'app',
   data() {
     return {
+      text: '',
       predict: 'Positive',
       prob: '...',
       isLoading: false,
@@ -16,7 +17,7 @@ export default {
 
       const config = {
         method: 'get',
-        url: 'http://localhost/sean/haha',
+        url: 'http://localhost:80/sean/' + this.text,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
